@@ -1,0 +1,33 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+patches:
+  - target:
+      kind: Application
+      name: bootstrap-placeholder
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: app-argocd-core
+      - op: add
+        path: /metadata/annotations
+        value:
+          argocd.argoproj.io/sync-wave: "1"
+      - op: replace
+        path: /spec/project
+        value: platform
+      - op: remove
+        path: /spec/source
+      - op: add
+        path: /spec/sources
+        value:
+          - repoURL: https://argoproj.github.io/argo-helm
+            chart: argo-cd
+            targetRevision: 9.4.17
+            helm:
+              valueFiles:
+                - $values/argocd/core/values.yaml
+          - repoURL: https://github.com/example-org/platform-gitops.git
+            targetRevision: main
+            ref: values

@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cert-manager
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            type: standard
+            ready: "true"
+  template:
+    metadata:
+      name: cert-manager-{{ .nameNormalized }}
+      namespace: argocd
+      labels:
+        layer: platform
+        component: cert-manager
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: platform
+      sources:
+        - repoURL: https://charts.jetstack.io
+          chart: cert-manager
+          targetRevision: v1.20.1
+          helm:
+            valueFiles:
+              - $values/argocd/values/platform/cert-manager/common.yaml
+              - $values/argocd/values/platform/cert-manager/env-{{ index .metadata.labels "env" }}.yaml
+            valuesObject:
+              crds:
+                enabled: true
+        - repoURL: https://github.com/example-org/platform-gitops.git
+          targetRevision: main
+          ref: values
+      destination:
+        server: '{{ .server }}'
+        namespace: cert-manager
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

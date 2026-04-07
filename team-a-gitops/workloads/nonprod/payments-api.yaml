@@ -1,0 +1,8 @@
+app:
+  name: payments-api
+  repoURL: https://github.com/example-org/payments-api-deploy.git
+  targetRevision: main
+  path: helm
+  namespace: payments
+  valuesPath: values/payments-api
+

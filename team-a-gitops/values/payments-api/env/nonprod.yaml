@@ -1,0 +1,10 @@
+replicaCount: 1
+
+ingress:
+  enabled: true
+  hosts:
+    - host: payments.nonprod.corp.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+

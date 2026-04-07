@@ -1,0 +1,34 @@
+dex:
+  enabled: false
+
+configs:
+  cm:
+    admin.enabled: false
+    oidc.config: |
+      name: ExampleOIDC
+      issuer: https://auth.example.com/realms/platform
+      clientID: argocd
+      clientSecret: $oidc.example.clientSecret
+      requestedScopes:
+        - openid
+        - profile
+        - email
+        - groups
+  rbac:
+    policy.default: role:readonly
+    scopes: "[groups, email]"
+    policy.csv: |
+      p, role:readonly, applications, get, */*, allow
+      p, role:readonly, applicationsets, get, *, allow
+      p, role:readonly, clusters, get, *, allow
+      p, role:readonly, logs, get, */*, allow
+      p, role:readonly, projects, get, *, allow
+      p, role:readonly, repositories, get, *, allow
+      p, role:team-a-prod-deployer, applications, *, team-a-prod/*, allow
+      p, role:team-a-prod-deployer, logs, get, team-a-prod/*, allow
+      p, role:team-a-prod-deployer, repositories, get, *, allow
+      g, example-org:platform-admins, role:admin
+      g, example-org:team-a-prod-deployers, role:team-a-prod-deployer
+  secret:
+    extra:
+      oidc.example.clientSecret: replace-me

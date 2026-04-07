@@ -1,0 +1,10 @@
+replicaCount: 3
+
+ingress:
+  enabled: true
+  hosts:
+    - host: payments.corp.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+

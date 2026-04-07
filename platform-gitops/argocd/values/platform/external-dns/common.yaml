@@ -1,0 +1,11 @@
+policy: sync
+registry: txt
+
+serviceAccount:
+  create: true
+  name: external-dns
+
+sources:
+  - service
+  - ingress
+

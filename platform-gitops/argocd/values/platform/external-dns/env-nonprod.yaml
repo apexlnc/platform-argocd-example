@@ -1,0 +1,6 @@
+domainFilters:
+  - nonprod.corp.example.com
+
+extraArgs:
+  - --aws-zone-type=public
+

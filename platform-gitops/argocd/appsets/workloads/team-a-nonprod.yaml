@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: team-a-nonprod
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - matrix:
+        generators:
+          - git:
+              repoURL: https://github.com/example-org/team-a-gitops.git
+              revision: main
+              files:
+                - path: workloads/nonprod/*.yaml
+          - clusters:
+              selector:
+                matchLabels:
+                  team: team-a
+                  env: nonprod
+                  ready: "true"
+  template:
+    metadata:
+      name: '{{ .app.name }}-{{ .nameNormalized }}'
+      namespace: argocd
+      labels:
+        layer: workload
+        team: team-a
+        env: nonprod
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: team-a-nonprod
+      sources:
+        - repoURL: '{{ .app.repoURL }}'
+          targetRevision: '{{ .app.targetRevision }}'
+          path: '{{ .app.path }}'
+          helm:
+            valueFiles:
+              - $values/{{ .app.valuesPath }}/common.yaml
+              - $values/{{ .app.valuesPath }}/env/{{ index .metadata.labels "env" }}.yaml
+              - $values/{{ .app.valuesPath }}/clusters/{{ .name }}.yaml
+            ignoreMissingValueFiles: true
+            valuesObject:
+              global:
+                clusterName: '{{ .name }}'
+                environment: '{{ index .metadata.labels "env" }}'
+                region: '{{ index .metadata.labels "region" }}'
+        - repoURL: https://github.com/example-org/team-a-gitops.git
+          targetRevision: main
+          ref: values
+      destination:
+        server: '{{ .server }}'
+        namespace: '{{ .app.namespace }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

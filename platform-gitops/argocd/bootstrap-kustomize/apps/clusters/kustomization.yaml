@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+patches:
+  - target:
+      kind: Application
+      name: bootstrap-placeholder
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: app-clusters
+      - op: add
+        path: /metadata/annotations
+        value:
+          argocd.argoproj.io/sync-wave: "2"
+      - op: replace
+        path: /spec/source/path
+        value: argocd/clusters

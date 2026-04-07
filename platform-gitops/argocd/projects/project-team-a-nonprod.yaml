@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: team-a-nonprod
+  namespace: argocd
+spec:
+  description: Team A non-production workloads
+  sourceNamespaces:
+    - argocd
+  sourceRepos:
+    - https://github.com/example-org/team-a-gitops.git
+    - https://github.com/example-org/payments-api-deploy.git
+    - https://github.com/example-org/checkout-ui-deploy.git
+  destinations:
+    - server: https://use1-apps-dev-a.eks.us-east-1.amazonaws.com
+      namespace: payments
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  orphanedResources:
+    warn: true

@@ -1,0 +1,11 @@
+image:
+  repository: 111122223333.dkr.ecr.us-east-1.amazonaws.com/payments-api
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
