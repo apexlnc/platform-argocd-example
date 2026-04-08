@@ -1,0 +1,8 @@
+workloadName: gha-runners
+project: gha-runners
+repoURL: https://github.com/example-org/gha-runners-deployments.git
+targetRevision: main
+namespace: gha-runners
+pathPrefix: environments
+selectorKey: workload.gha-runners/enabled
+selectorValue: "true"

@@ -1,0 +1,3 @@
+name: nonprod
+description: Shared non-production environment
+promotionPolicy: fast

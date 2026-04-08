@@ -1,0 +1,34 @@
+name: Validate GitOps
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Validate required layout
+        run: |
+          test -f bootstrap/control-plane/root-app.yaml
+          test -d projects
+          test -d appsets
+          test -d workloads
+          test -d values
+          test -d environments
+          test -d docs
+
+      - name: Lint YAML
+        run: yamllint .

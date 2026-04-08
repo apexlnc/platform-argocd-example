@@ -1,0 +1,57 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: workloads
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - matrix:
+        generators:
+          - git:
+              repoURL: https://github.com/example-org/platform-gitops.git
+              revision: main
+              files:
+                - path: workloads/*.yaml
+          - clusters:
+              selector:
+                matchExpressions:
+                  - key: ready
+                    operator: In
+                    values:
+                      - "true"
+                  - key: class
+                    operator: In
+                    values:
+                      - workload
+                  - key: "{{ .selectorKey }}"
+                    operator: In
+                    values:
+                      - "{{ .selectorValue }}"
+  template:
+    metadata:
+      name: "{{ .workloadName }}-{{ .nameNormalized }}"
+      namespace: argocd
+      labels:
+        workload: "{{ .workloadName }}"
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: "{{ .project }}"
+      source:
+        repoURL: "{{ .repoURL }}"
+        targetRevision: "{{ .targetRevision }}"
+        path: "{{ .pathPrefix }}/{{ index .metadata.labels \"env\" }}/clusters/{{ .name }}"
+      destination:
+        server: "{{ .server }}"
+        namespace: "{{ .namespace }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

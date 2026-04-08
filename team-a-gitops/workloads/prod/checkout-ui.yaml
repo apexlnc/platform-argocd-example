@@ -1,8 +1,0 @@
-app:
-  name: checkout-ui
-  repoURL: https://github.com/example-org/checkout-ui-deploy.git
-  targetRevision: main
-  path: helm
-  namespace: checkout
-  valuesPath: values/checkout-ui
-

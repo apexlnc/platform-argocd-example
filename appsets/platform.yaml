@@ -1,0 +1,95 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - matrix:
+        generators:
+          - list:
+              elements:
+                - component: argocd
+                  clusterClass: management
+                  repoURL: https://argoproj.github.io/argo-helm
+                  chart: argo-cd
+                  targetRevision: 7.8.2
+                  namespace: argocd
+                - component: cert-manager
+                  clusterClass: workload
+                  repoURL: https://charts.jetstack.io
+                  chart: cert-manager
+                  targetRevision: v1.20.1
+                  namespace: cert-manager
+                - component: external-dns
+                  clusterClass: workload
+                  repoURL: https://kubernetes-sigs.github.io/external-dns/
+                  chart: external-dns
+                  targetRevision: 1.20.0
+                  namespace: external-dns
+                - component: external-secrets
+                  clusterClass: workload
+                  repoURL: https://charts.external-secrets.io
+                  chart: external-secrets
+                  targetRevision: 2.2.0
+                  namespace: external-secrets
+                - component: ingress-nginx
+                  clusterClass: workload
+                  repoURL: https://kubernetes.github.io/ingress-nginx
+                  chart: ingress-nginx
+                  targetRevision: 4.12.1
+                  namespace: ingress-nginx
+                - component: karpenter
+                  clusterClass: workload
+                  repoURL: oci://public.ecr.aws/karpenter
+                  chart: karpenter
+                  targetRevision: 1.3.0
+                  namespace: karpenter
+                - component: observability
+                  clusterClass: workload
+                  repoURL: https://prometheus-community.github.io/helm-charts
+                  chart: kube-prometheus-stack
+                  targetRevision: 69.8.2
+                  namespace: observability
+          - clusters:
+              selector:
+                matchLabels:
+                  ready: "true"
+                  class: "{{ .clusterClass }}"
+  template:
+    metadata:
+      name: "{{ .component }}-{{ .nameNormalized }}"
+      namespace: argocd
+      labels:
+        layer: platform
+        component: "{{ .component }}"
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: platform
+      sources:
+        - repoURL: "{{ .repoURL }}"
+          chart: "{{ .chart }}"
+          targetRevision: "{{ .targetRevision }}"
+          helm:
+            releaseName: "{{ .component }}"
+            valueFiles:
+              - $values/values/platform/{{ .component }}.yaml
+              - $values/environments/{{ index .metadata.labels "env" }}/platform/{{ .component }}.yaml
+        - repoURL: https://github.com/example-org/platform-gitops.git
+          targetRevision: main
+          ref: values
+      destination:
+        server: "{{ .server }}"
+        namespace: "{{ .namespace }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

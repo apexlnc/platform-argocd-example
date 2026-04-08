@@ -1,0 +1,10 @@
+* @example-org/platform-team
+
+/bootstrap/ @example-org/platform-team
+/projects/ @example-org/platform-team
+/appsets/ @example-org/platform-team
+/values/ @example-org/platform-team
+/workloads/gha-runners.yaml @example-org/platform-team @example-org/gha-runners
+/workloads/devops.yaml @example-org/platform-team @example-org/devops
+/environments/nonprod/clusters/ @example-org/platform-team
+/environments/prod/clusters/ @example-org/platform-team

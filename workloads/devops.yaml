@@ -1,0 +1,8 @@
+workloadName: devops
+project: devops
+repoURL: https://github.com/example-org/devops-deployments.git
+targetRevision: main
+namespace: devops
+pathPrefix: environments
+selectorKey: workload.devops/enabled
+selectorValue: "true"

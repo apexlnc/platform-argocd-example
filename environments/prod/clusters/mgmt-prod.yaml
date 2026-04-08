@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cluster-mgmt-prod
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+    account-id: "111122223333"
+  labels:
+    argocd.argoproj.io/secret-type: cluster
+    argocd.argoproj.io/auto-label-cluster-info: "true"
+    env: prod
+    class: management
+    region: us-east-1
+    ready: "true"
+type: Opaque
+stringData:
+  name: mgmt-prod
+  server: https://mgmt-prod.eks.us-east-1.amazonaws.com
+  config: |
+    {
+      "awsAuthConfig": {
+        "clusterName": "mgmt-prod",
+        "roleARN": "arn:aws:iam::111122223333:role/argocd-mgmt-prod"
+      },
+      "tlsClientConfig": {
+        "insecure": false,
+        "caData": "<base64-encoded-cluster-ca>"
+      }
+    }

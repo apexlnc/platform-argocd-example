@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-control-plane
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/example-org/platform-gitops.git
+      targetRevision: main
+      path: projects
+      directory:
+        recurse: true
+    - repoURL: https://github.com/example-org/platform-gitops.git
+      targetRevision: main
+      path: appsets
+      directory:
+        recurse: true
+    - repoURL: https://github.com/example-org/platform-gitops.git
+      targetRevision: main
+      path: environments/nonprod/clusters
+      directory:
+        recurse: true
+    - repoURL: https://github.com/example-org/platform-gitops.git
+      targetRevision: main
+      path: environments/prod/clusters
+      directory:
+        recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
